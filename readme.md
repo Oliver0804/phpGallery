@@ -7,6 +7,14 @@ A simple all-in-one php photo gallery script intended to be simply dropped into 
 
 Live demo: http://gallery.jpederson.com
 
+
+### Add docker cli
+```
+  docker build -t my-php-server-with-gd .
+  docker run -d -p 8080:80 -v /root/php/photo-gallery:/var/www/html my-php-server-with-gd
+  chmod -R 777 /root/php/photo-gallery
+```
+
 *****
 
 ### Quick Install (cli)
