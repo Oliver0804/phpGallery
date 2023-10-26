@@ -1,4 +1,57 @@
 <?php
+$messages = ''; // 初始化消息變數
+
+if(isset($_POST["submit"])) {
+    $target_dir = "./";
+    $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+    $uploadOk = 1;
+    $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+
+    // 檢查文件是否為真實的圖像
+    $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+    if($check !== false) {
+        $messages .= "<p>File is an image - " . $check["mime"] . ".</p>";
+        $uploadOk = 1;
+    } else {
+        $messages .= "<p>File is not an image.</p>";
+        $uploadOk = 0;
+    }
+
+    // 檢查文件是否已經存在
+    if (file_exists($target_file)) {
+        $messages .= "<p>Sorry, file already exists.</p>";
+        $uploadOk = 0;
+    }
+
+    // 檢查文件大小
+    if ($_FILES["fileToUpload"]["size"] > 5000000) {
+        $messages .= "<p>Sorry, your file is too large.</p>";
+        $uploadOk = 0;
+    }
+
+    // 允許特定的文件格式
+    if($imageFileType != "jpg" && $imageFileType != "jpeg") {
+        $messages .= "<p>Only JPG & JPEG files are allowed.</p>";
+        $uploadOk = 0;
+    }
+
+    // 檢查 $uploadOk 是否由於錯誤設置為 0 
+    if ($uploadOk == 0) {
+        $messages .= "<p>Sorry, your file was not uploaded.</p>";
+    } else {
+        if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+            $messages .= "<p>The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.</p>";
+        } else {
+            $messages .= "<p>Sorry, there was an error uploading your file.</p>";
+        }
+    }
+}
+
+?>
+
+
+
+<?php
 /***********************************************************************
   PHP Photo Gallery
   --------------------
@@ -29,7 +82,7 @@ function make_thumb( $src, $dest, $desired_width ) {
 
 }
 
-
+//phpinfo();
 // a function to check if we're running CLI or in browser.
 function is_cli() {
     return defined( 'STDIN' );
@@ -88,6 +141,35 @@ if ( !is_cli() ) {
         display: block;
         padding-bottom: 100%;
     }
+.upload-btn-wrapper {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1000;
+    background-color: #4CAF50;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.upload-btn-wrapper span {
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.upload-btn-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -96,6 +178,21 @@ if ( !is_cli() ) {
     <script> $(document).ready(function() { $('a').magnificPopup( { type:'image' } ); }); </script>
 </head>
 <body>
+/*
+<?php if(!empty($messages)): ?>
+<div id="messages" style="position: fixed; top: 0; left: 0; z-index: 2000; background-color: #FFF; padding: 10px; border: 1px solid #000;">
+    <?php echo $messages; ?>
+</div>
+<?php endif; ?>
+*/
+<div style="position: fixed; bottom: 10px; left: 10px; z-index: 1000; background-color: #FFF; padding: 10px; border: 1px solid #000;">
+    <form action="index.php" method="post" enctype="multipart/form-data">
+        選擇圖片：
+        <input type="file" name="fileToUpload" id="fileToUpload" style="margin: 10px 0;">
+        <input type="submit" value="上傳圖片" name="submit" style="padding: 5px 10px;">
+    </form>
+</div>
+
 <?php
 }
 
